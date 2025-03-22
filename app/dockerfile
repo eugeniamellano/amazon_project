@@ -1,0 +1,21 @@
+# Usa una imagen oficial de Python
+FROM python:3.9
+
+# Establece el directorio de trabajo en el contenedor
+WORKDIR /app
+
+# Copia los archivos del proyecto al contenedor
+COPY . /app
+
+# Copia el archivo de dependencias y las instala
+COPY requirements.txt /app/
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Descargar los stopwords de nltk
+RUN python -c "import nltk; nltk.download('stopwords')"
+
+# Expone el puerto en el que correrá la API
+EXPOSE 8000
+
+# Comando para ejecutar la API con Uvicorn
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
