@@ -22,9 +22,11 @@ app = FastAPI()
 # Cargar el modelo guardado
 #model = load_model('./amazon_model.h5')
 
+url = "https://amazon-eugenia.s3.us-east-1.amazonaws.com/Amazon_Unlocked_Mobile.csv"
+df = pd.read_csv(url)
 
-# Cargar el dataset
-df = pd.read_csv("Amazon_Unlocked_Mobile.csv")  #agregue esto
+# Cargar el dataset local
+#df = pd.read_csv("Amazon_Unlocked_Mobile.csv")  #agregue esto
 
 # Eliminar filas con valores nulos en la columna de reseñas
 df.dropna(subset=["Reviews"], inplace=True)  #agregue esto
