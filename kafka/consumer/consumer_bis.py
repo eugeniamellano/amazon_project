@@ -1,11 +1,7 @@
 import os
 import pandas as pd
-from confluent_kafka import Consumer
 import json
-import boto3
-import io
 from dotenv import load_dotenv
-import ccloud_lib
 
 
 # Function to process each Kafka message
