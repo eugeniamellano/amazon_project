@@ -7,7 +7,7 @@ RUN mkdir -p api
 
 # Copier uniquement les fichiers nécessaires
 COPY test/requirements.txt requirements.txt
-RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # Copier le code source et les tests (avec le bon chemin)
 COPY kafka/consumer/consumer.py /app/
