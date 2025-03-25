@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from typing import List
 import re
-import mlflow.pyfunc
 import pickle
 import boto3
 from spacy.lang.en.stop_words import STOP_WORDS
