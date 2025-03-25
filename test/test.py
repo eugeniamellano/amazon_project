@@ -30,10 +30,10 @@ def test_predict_sentiment():
     content = response.json()
 
     # Check if 'sentimiento' is present in the response
-    assert "sentimiento" in content
+    assert "sentiment" in content
 
     # Validate that the value is one of the expected classes
-    assert content["sentimiento"] in ["Positivo", "Neutral", "Negativo"]
+    assert content["sentiment"] in ["Positivo", "Neutral", "Negativo"]
 
 
 # ------------------------------
