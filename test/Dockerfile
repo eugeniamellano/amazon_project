@@ -10,9 +10,7 @@ COPY test/requirements.txt requirements.txt
 RUN pip install --no-cache-dir --upgrade pip && pip install --no-cache-dir --prefer-binary -r requirements.txt
 
 # Copier le code source et les tests (avec le bon chemin)
-COPY kafka/consumer/consumer.py /app/
-COPY kafka/consumer/ccloud_lib.py /app/
-COPY kafka/consumer/python.config /app/
+COPY kafka/consumer/consumer_bis.py /app/
 COPY app/app.py /app/api
 COPY test/test.py test/upload_s3.py /app/
 

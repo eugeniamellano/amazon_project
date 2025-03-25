@@ -6,7 +6,7 @@ warnings.filterwarnings('ignore', category=DeprecationWarning)
 import pytest
 import json
 import pandas as pd
-from consumer import process_message  # Make sure to import the function correctly
+from consumer_bis import process_message  # Make sure to import the function correctly
 
 # Initialize the FastAPI test client
 client = TestClient(app)
