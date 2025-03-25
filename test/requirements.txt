@@ -4,3 +4,4 @@ pytest
 boto3
 fastapi
 httpx
+spacy
