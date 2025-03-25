@@ -14,3 +14,4 @@ seaborn              # Para visualización de gráficos estadísticos
 python-dotenv        # Para cargar variables de entorno
 requests             # Si haces peticiones HTTP desde la API
 s3fs
+confluent_kafka
