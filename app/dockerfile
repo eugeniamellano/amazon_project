@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN python -c "import nltk; nltk.download('stopwords')"
 
 # Expone el puerto en el que correrá la API
-EXPOSE 8000
+EXPOSE 7860
 
 # Comando para ejecutar la API con Uvicorn
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "7860"]
