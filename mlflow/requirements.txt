@@ -2,7 +2,6 @@ fastapi
 pandas
 uvicorn
 numpy
-tensorflow
 nltk
 pickle-mixin
 gunicorn             # Para servir la API en producción
@@ -13,7 +12,3 @@ python-dotenv        # Para cargar variables de entorno
 requests             # Si haces peticiones HTTP desde la API
 uvicorn
 mlflow
-keras
-spacy
-boto3
-s3fs

@@ -3,97 +3,91 @@ import numpy as np
 import pandas as pd
 from typing import List
 import re
-import nltk
-import tensorflow as tf
-from nltk.corpus import stopwords
-from nltk.stem import PorterStemmer
-from tensorflow.keras.preprocessing.text import Tokenizer
-from tensorflow.keras.preprocessing.sequence import pad_sequences
-from tensorflow.keras.models import load_model
-import mlflow.pyfunc
+import pickle
+import boto3
+from spacy.lang.en.stop_words import STOP_WORDS
+import os
+from dotenv import load_dotenv
+import requests
+from io import BytesIO
+
+# URLs públicas de los archivos
+TFIDF_URL = "https://amazon-eugenia.s3.amazonaws.com/mlflow-lead/tfidf_vectorizer.pkl"
+LOG_MODEL_URL = "https://amazon-eugenia.s3.amazonaws.com/mlflow-lead/logistic_regression_model.pkl"
+
+# Descargar y cargar el vectorizador TF-IDF y el modelo de regresión logística
+tfidf_vectorizer = pickle.load(BytesIO(requests.get(TFIDF_URL).content))
+log_model = pickle.load(BytesIO(requests.get(LOG_MODEL_URL).content))
+df=pd.read_csv("https://amazon-eugenia.s3.us-east-1.amazonaws.com/mlflow-lead/Amazon_Unlocked_Mobile.csv")
 
 
-# Descargar stopwords si no están disponibles
-nltk.download('stopwords')
-
+'''
+# Cargar variables de entorno
+load_dotenv()
+#AWS_ACCESS_KEY = os.environ('AWS_ACCESS_KEY_ID')
+#AWS_SECRET_KEY = os.environ('AWS_SECRET_ACCESS_KEY')
+AWS_REGION = 'us-east-1'
+S3_BUCKET = 'amazon-eugenia'
+'''
 # Inicializar FastAPI
 app = FastAPI()
 
-# Cargar el modelo guardado
-#model = load_model('./amazon_model.h5')
 
-url = "https://amazon-eugenia.s3.us-east-1.amazonaws.com/Amazon_Unlocked_Mobile.csv"
-df = pd.read_csv(url)
+# Inicializar stopwords de spaCy
+stop_words = STOP_WORDS
 
-# Cargar el dataset local
-#df = pd.read_csv("Amazon_Unlocked_Mobile.csv")  #agregue esto
-
-# Eliminar filas con valores nulos en la columna de reseñas
-df.dropna(subset=["Reviews"], inplace=True)  #agregue esto
-
-
-# Load MLflow model as a PyFuncModel
-logged_model = 'runs:/633c81240a814a3aa3ec7de19a2e15df/lstm_model'
-model = mlflow.pyfunc.load_model(logged_model)
-
-
-# Inicializar el Stemmer y las stopwords
-ps = PorterStemmer()
-stop_words = set(stopwords.words('english'))
-
-# Función de preprocesamiento
+# Función de preprocesamiento de texto
 def preprocess_text(text):
-    cleaned_text = re.sub(r'[^a-zA-Z]', ' ', text)
-    words = cleaned_text.lower().split()
-    processed_words = [ps.stem(word) for word in words if word not in stop_words]
+    """
+    Preprocesa el texto de entrada:
+    - Elimina caracteres no alfabéticos
+    - Convierte todo a minúsculas
+    - Elimina las stopwords
+    """
+    cleaned_text = re.sub(r'[^a-zA-Z]', ' ', text)  # Eliminar caracteres no alfabéticos
+    words = cleaned_text.lower().split()  # Convertir a minúsculas y dividir en palabras
+    processed_words = [word for word in words if word not in stop_words]  # Eliminar stopwords
     return ' '.join(processed_words)
-
-# Función para crear y ajustar el tokenizador
-def create_tokenizer(corpus):
-    tokenizer = Tokenizer(num_words=5000)
-    tokenizer.fit_on_texts(corpus)
-    return tokenizer
 
 # Endpoint para predecir el sentimiento
 @app.post("/predict/")
 def predict_sentiment(review: str):
-    # Preprocesar el texto de la reseña
+    """
+    Predice el sentimiento de la reseña proporcionada utilizando el modelo de regresión logística preentrenado.
+    """
+    # Preprocesar la reseña de entrada
     processed_review = preprocess_text(review)
     
-    # Crear el corpus a partir de la reseña procesada (si tienes más reseñas previas, puedes incluirlas aquí)
-    corpus = [processed_review]
+    # Vectorizar la reseña preprocesada usando el vectorizador TF-IDF cargado
+    review_vectorized = tfidf_vectorizer.transform([processed_review])
     
-    # Crear y ajustar el tokenizador con el corpus
-    tokenizer = create_tokenizer(corpus)
-    
-    # Convertir el texto procesado a secuencias numéricas
-    sequence = tokenizer.texts_to_sequences([processed_review])
-    
-    # Rellenar las secuencias para que todas tengan la misma longitud
-    padded_sequence = pad_sequences(sequence, maxlen=100)
-    
-    # Realizar la predicción utilizando el modelo cargado
-    prediction = model.predict(padded_sequence)
-    
-    # Obtener la clase de sentimiento con la predicción
-    sentiment_class = np.argmax(prediction)
+    # Predecir la clase de sentimiento usando el modelo de regresión logística cargado
+    prediction = log_model.predict(review_vectorized)[0]
     
     # Etiquetas de sentimiento
-    sentiment_labels = {0: 'Negativo', 1: 'Neutral', 2: 'Positivo'}
+    sentiment_labels = {
+        0: 'Negativo',
+        1: 'Positivo',
+        2: 'Neutral'
+    }
     
-    return {"sentimiento": sentiment_labels[sentiment_class]}
+    # Retornar la etiqueta de sentimiento predicha
+    return {"sentiment": sentiment_labels.get(prediction, "Unknown")}
 
-
-# Nuevo endpoint para previsualizar el dataset
-@app.get("/preview/{number_row}", tags=["Data-Preview"], response_model=List[dict])  #agregue esto
-async def preview_dataset(number_row: int = 5):  #agregue esto
+# Endpoint para previsualizar filas del dataset
+@app.get("/preview/{number_row}", tags=["Data-Preview"], response_model=List[dict])
+async def preview_dataset(number_row: int = 5):
     """
-    Display a sample of rows of the dataset.
-    `number_row` parameter allows to specify the number of rows you would like to display (default value: 5).
+    Muestra una muestra de filas del dataset almacenado en S3.
     """
-    return df.head(number_row).to_dict(orient="records")  #agregue esto
+        
+    # Eliminar filas con reseñas faltantes
+    df.dropna(subset=["Reviews"], inplace=True)
+    
+    # Retornar las primeras 'number_row' filas como diccionarios
+    return df.head(number_row).to_dict(orient="records")
 
 # Endpoint de prueba
 @app.get("/")
 def read_root():
-    return {"message": "API de análisis de sentimiento funcionando"}
+    return {"message": "API is working"}

@@ -1,19 +1,18 @@
-fastapi
 pandas
-uvicorn
 numpy
-tensorflow
-nltk
-pickle-mixin
+pytest
+boto3
+fastapi
+httpx
+spacy
+dotenv
+uvicorn
 gunicorn             # Para servir la API en producción
 scikit-learn         # Para preprocesamiento y evaluación del modelo
 matplotlib           # Para visualización de gráficos
 seaborn              # Para visualización de gráficos estadísticos
 python-dotenv        # Para cargar variables de entorno
 requests             # Si haces peticiones HTTP desde la API
-uvicorn
-mlflow
-keras
-spacy
-boto3
 s3fs
+confluent_kafka
+avro
