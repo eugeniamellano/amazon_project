@@ -1,3 +1,4 @@
+##THIS IS HOW I TRAIN MY MODELS LOCALLY ; I USE mlflow/app.py ON MY PROJECT
 import mlflow
 import mlflow.keras
 import mlflow.sklearn

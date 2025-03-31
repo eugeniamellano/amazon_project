@@ -3,7 +3,6 @@ import pandas as pd
 import json
 from dotenv import load_dotenv
 
-
 # Function to process each Kafka message
 def process_message(msg_value):
     

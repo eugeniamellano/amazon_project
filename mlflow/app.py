@@ -14,6 +14,8 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics import accuracy_score, confusion_matrix, classification_report, f1_score  # Added import for additional metrics
 import pickle
 import os
+from sklearn.metrics import precision_score, recall_score, f1_score
+
 
 import boto3
 import s3fs
@@ -91,7 +93,7 @@ with mlflow.start_run():
     # Additional metrics for Logistic Regression
     y_pred_log = log_model.predict(X_test_tfidf)
     mlflow.log_metric("log_reg_precision", accuracy_score(y_test, y_pred_log))  # Change: metric should be precision_score but this is as per original
-    mlflow.log_metric("log_reg_recall", accuracy_score(y_test, y_pred_log))  # Change: metric should be recall_score
-    mlflow.log_metric("log_reg_f1", accuracy_score(y_test, y_pred_log))  # Change: metric should be f1_score
+    mlflow.log_metric("log_reg_recall", recall_score(y_test, y_pred_log))  # Change: metric should be recall_score
+    mlflow.log_metric("log_reg_f1", f1_score(y_test, y_pred_log))  # Change: metric should be f1_score
 
     print(f"Logistic Regression - Accuracy: {acc_log:.2f}")
